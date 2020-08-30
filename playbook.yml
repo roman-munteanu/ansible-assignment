@@ -1,0 +1,9 @@
+- name: Deploy DB
+  hosts: db_servers
+  tasks:
+    - include: tasks/deploy_db.yml
+
+- name: Deploy a web application
+  hosts: web_servers
+  tasks:
+    - include: tasks/deploy_web.yml

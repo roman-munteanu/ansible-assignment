@@ -1,0 +1,57 @@
+- name: Install MySQL community repository
+  become: yes
+  become_user: root
+  yum:
+    name: "http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm"
+    state: present
+
+- name: Install MySQL database
+  become: yes
+  become_user: root
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "mysql-server"
+    - "mysql-devel"
+
+- name: create MySQL configuration file
+  become: yes
+  become_user: root
+  copy:
+    content: |
+      [client]
+      user=root
+      password="root"
+    dest: "/etc/.my.cnf"
+
+- name: Start MySQL Service
+  become: yes
+  become_user: root
+  service:
+    name: mysqld
+    state: started
+    enabled: yes
+
+- name: Install mysql-python package
+  become: yes
+  become_user: root
+  yum:
+    name: MySQL-python
+    state: present
+
+- name: Create Application Database
+  become: yes
+  become_user: root
+  mysql_db:
+    name: "{{ db_name }}"
+    state: present
+
+- name: Create Database user
+  become: yes
+  become_user: root
+  mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: '*.*:ALL'
+    state: present

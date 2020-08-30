@@ -1,0 +1,55 @@
+- name: Install all required dependencies
+  become: yes
+  become_user: root
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "epel-release"
+    - "python"
+    - "python-devel"
+
+- name: Install mysql-python package
+  become: yes
+  become_user: root
+  yum:
+    name: MySQL-python
+    state: present
+
+- name: Install pip
+  become: yes
+  become_user: root
+  yum:
+    name: "python-pip"
+    state: present
+
+- name: Install required Python libraries
+  become: yes
+  become_user: root
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "flask"
+    - "flask-mysql"
+
+- name: Install git
+  become: yes
+  become_user: root
+  yum:
+    name: git
+    state: present
+
+- name: Clone Web Application Repository
+  git:
+    repo: https://github.com/kodekloudhub/simple_web_application.git
+    dest: /home/osboxes/simple_web_application
+
+- name:
+  lineinfile:
+    path: /home/osboxes/simple_web_application/app.py
+    regexp: "app.config['MYSQL_DATABASE_HOST'] = mysql_database_host"
+    line: "app.config['MYSQL_DATABASE_HOST'] = '{{ db_host }}'"
+
+- name: Start web server
+  shell: FLASK_APP=/home/osboxes/simple_web_application/app.py nohup flask run --host=0.0.0.0 &
